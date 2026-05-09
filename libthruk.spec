@@ -25,8 +25,8 @@ BuildRequires: perl(LWP::UserAgent)
 BuildRequires: perl(Module::Install)
 BuildRequires: perl(XML::Parser)
 
-# rhel / rocky / alma / fedora
-%if 0%{?rhel} || 0%{?rocky} || 0%{?almalinux} || 0%{?fedora}
+# rhel / rocky / alma / fedora / amzn
+%if 0%{?rhel} || 0%{?rocky} || 0%{?almalinux} || 0%{?fedora} || 0%{?amzn}
 BuildRequires: perl-devel
 %endif
 
@@ -37,12 +37,9 @@ BuildRequires: epel-release
 
 Requires:      perl(Bit::Vector)
 Requires:      perl(Cpanel::JSON::XS)
-Requires:      perl(Crypt::Rijndael)
 Requires:      perl(Date::Calc)
-Requires:      perl(Date::Manip)
 Requires:      perl(DBD::mysql)
 Requires:      perl(DBI)
-Requires:      perl(FCGI)
 Requires:      perl(GD)
 Requires:      perl(HTML::Entities)
 Requires:      perl(HTTP::Request)
@@ -50,28 +47,37 @@ Requires:      perl(IO::Scalar)
 Requires:      perl(IO::Socket::IP)
 Requires:      perl(IO::Socket::SSL)
 Requires:      perl(IO::String)
-Requires:      perl(Log::Log4perl)
 Requires:      perl(LWP::Protocol::https)
 Requires:      perl(LWP::UserAgent)
-Requires:      perl(MIME::Lite)
 Requires:      perl(Module::Load)
 Requires:      perl(Net::HTTP)
 Requires:      perl(Net::SSLeay)
 Requires:      perl(parent)
+Requires:      perl(Pod::Usage)
+Requires:      perl(Socket)
+Requires:      perl(Storable)
+Requires:      perl(Thread::Queue)
+Requires:      perl(threads)
+Requires:      perl(Time::HiRes)
+Requires:      perl(URI::Escape)
+Requires:      perl(XML::Parser)
+
+# Modules typically absent from AL2023 default repos — bundle via src/
+# or install with cpanm at deploy time. Re-enable if a future AL2023
+# release ships them.
+%if !0%{?amzn}
+Requires:      perl(Crypt::Rijndael)
+Requires:      perl(Date::Manip)
+Requires:      perl(FCGI)
+Requires:      perl(Log::Log4perl)
+Requires:      perl(MIME::Lite)
 Requires:      perl(Plack)
 Requires:      perl(Plack::Handler::FCGI)
 Requires:      perl(Plack::Util)
 Requires:      perl(Plack::Test)
-Requires:      perl(Pod::Usage)
-Requires:      perl(Socket)
-Requires:      perl(Storable)
 Requires:      perl(Template)
-Requires:      perl(Thread::Queue)
-Requires:      perl(threads)
 Requires:      perl(Tie::IxHash)
-Requires:      perl(Time::HiRes)
-Requires:      perl(URI::Escape)
-Requires:      perl(XML::Parser)
+%endif
 
 # disable creating useless empty debug packages
 %define debug_package %{nil}
