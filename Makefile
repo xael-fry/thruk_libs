@@ -1,5 +1,5 @@
 NAME    = libthruk
-VERSION = 3.26
+VERSION = 3.28
 
 ifdef P5DIR
 P5TMPDIST = $(P5DIR)
@@ -98,8 +98,8 @@ MODULES = \
           LWP-Protocol-https-6.09.tar.gz \
           XML-Parser-2.44.tar.gz \
           Excel-Template-0.34.tar.gz \
-          LWP-Protocol-connect-6.09.tar.gz \
           Mozilla-CA-20250602.tar.gz \
+          LWP-Protocol-connect-6.09.tar.gz \
 
 
 build:
@@ -128,6 +128,11 @@ build:
 	find $(P5TMPDIST)/dest/lib -name \*.pm -exec chmod 644 {} \;
 	find $(P5TMPDIST)/dest/lib -name \*.pod -exec chmod 644 {} \;
 	find $(P5TMPDIST)/dest/lib -depth -type d -empty -exec rmdir {} \;
+	# Cleanup rpath errors in perl modules
+	! test -f $(P5TMPDIST)/dest/lib/perl5/*/auto/GD/GD.so                  || chrpath --delete $(P5TMPDIST)/dest/lib/perl5/*/auto/GD/GD.so
+	! test -f $(P5TMPDIST)/dest/lib/perl5/*/auto/DBD/mysql/mysql.so        || chrpath --delete $(P5TMPDIST)/dest/lib/perl5/*/auto/DBD/mysql/mysql.so
+	! test -f $(P5TMPDIST)/dest/lib/perl5/*/auto/Time/HiRes/HiRes.so       || chrpath --delete $(P5TMPDIST)/dest/lib/perl5/*/auto/Time/HiRes/HiRes.so
+	! test -f $(P5TMPDIST)/dest/lib/perl5/*/auto/XML/Parser/Expat/Expat.so || chrpath --delete $(P5TMPDIST)/dest/lib/perl5/*/auto/XML/Parser/Expat/Expat.so
 	@echo ""
 	@echo "################################################################"
 	@echo ""
@@ -147,7 +152,7 @@ build_modules:
 	    export PERL_MM_OPT=INSTALL_BASE=$(P5TMPDIST)/$(P5DESTDIR); \
 	    export PERL_MB_OPT=--install_base=$(P5TMPDIST)/$(P5DESTDIR); \
 	    export MODULEBUILDRC=$(P5TMPDIST)/$(P5DESTDIR)/.modulebuildrc; \
-	    export PERL5LIB=$(P5TMPDIST)/dest/lib/perl5:$(P5TMPDIST)/src/lib; \
+	    export PERL5LIB=$(P5TMPDIST)/dest/lib/perl5:$(P5TMPDIST)/src/lib:$(P5TMPDIST)/bootstrap/lib/perl5; \
 	    cd $(P5TMPDIST)/src && \
 	        FORCE=1 ./build_module.pl -p $(P5TMPDIST)/$(P5DESTDIR) $(BUILD_MODULES)
 
@@ -162,6 +167,12 @@ fetch:
 install:
 	mkdir -p $(INSTALLTARGET)
 	cp -rp $(P5TMPDIST)/dest/lib/perl5 $(INSTALLTARGET)
+
+installbuilddeps:
+	find $(P5TMPDIST)/bootstrap/lib -name \*.so -exec chmod 644 {} \; -exec strip {} \;
+	find $(P5TMPDIST)/bootstrap/lib -type f -name xsubpp -delete
+	mkdir -p $(INSTALLTARGET)
+	cp -rp $(P5TMPDIST)/bootstrap/lib/perl5 $(INSTALLTARGET)
 
 deb: $(NAME)-$(VERSION).tar.gz
 	tar zxvf $(NAME)-$(VERSION).tar.gz

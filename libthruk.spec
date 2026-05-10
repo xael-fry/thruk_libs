@@ -1,6 +1,6 @@
 Summary: Thruk perl libraries
 Name: libthruk
-Version: 3.26
+Version: 3.28
 Release: 0
 License: GPL-2.0-or-later
 Group: Applications/System
@@ -10,73 +10,61 @@ Vendor: Labs Consol
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
 BuildRequires: make
-BuildRequires: rsync
-BuildRequires: gcc
+BuildRequires: gd-devel > 1.8
+BuildRequires: zlib-devel
+BuildRequires: libpng-devel
+BuildRequires: libjpeg-devel
+BuildRequires: mysql-devel
 BuildRequires: perl
-BuildRequires: perl(Bit::Vector)
-BuildRequires: perl(Cpanel::JSON::XS)
-BuildRequires: perl(Date::Calc)
-BuildRequires: perl(Digest::SHA)
-BuildRequires: perl(ExtUtils::Install)
-BuildRequires: perl(HTTP::Request)
-BuildRequires: perl(IO::Scalar)
-BuildRequires: perl(LWP::Protocol::https)
-BuildRequires: perl(LWP::UserAgent)
-BuildRequires: perl(Module::Install)
-BuildRequires: perl(XML::Parser)
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: binutils
+BuildRequires: gcc
+BuildRequires: chrpath
+BuildRequires: rsync
+Requires: gd
 
-# rhel / rocky / alma / fedora / amzn
-%if 0%{?rhel} || 0%{?rocky} || 0%{?almalinux} || 0%{?fedora} || 0%{?amzn}
+# sles
+%if %{defined suse_version}
+BuildRequires: libexpat-devel
+BuildRequires: fontconfig-devel
+BuildRequires: xorg-x11-libXpm-devel
+# sles 12
+%if 0%{?suse_version} >= 1315
+BuildRequires: libpng16-devel
+BuildRequires: libtiff-devel
+BuildRequires: libvpx-devel
+Requires: libjpeg62
+%else
+# sles 11
+BuildRequires: freetype2-devel
+%endif
+%endif
+
+# centos
+%if 0%{?el6}
 BuildRequires: perl-devel
+BuildRequires: expat-devel
+%endif
+%if 0%{?el7}
+BuildRequires: perl(Locale::Maketext::Simple)
+BuildRequires: perl-devel
+Requires: perl(Data::Dumper)
+Requires: perl(Digest)
+%endif
+%if 0%{?el8}
+BuildRequires: perl-devel
+BuildRequires: expat-devel
+%endif
+%if 0%{?el9}
+BuildRequires: perl-devel
+BuildRequires: expat-devel
 %endif
 
-# rhel / rocky / alma
-%if 0%{?rhel} || 0%{?rocky} || 0%{?almalinux}
-BuildRequires: epel-release
-%endif
-
-Requires:      perl(Bit::Vector)
-Requires:      perl(Cpanel::JSON::XS)
-Requires:      perl(Date::Calc)
-Requires:      perl(DBD::mysql)
-Requires:      perl(DBI)
-Requires:      perl(GD)
-Requires:      perl(HTML::Entities)
-Requires:      perl(HTTP::Request)
-Requires:      perl(IO::Scalar)
-Requires:      perl(IO::Socket::IP)
-Requires:      perl(IO::Socket::SSL)
-Requires:      perl(IO::String)
-Requires:      perl(LWP::Protocol::https)
-Requires:      perl(LWP::UserAgent)
-Requires:      perl(Module::Load)
-Requires:      perl(Net::HTTP)
-Requires:      perl(Net::SSLeay)
-Requires:      perl(parent)
-Requires:      perl(Pod::Usage)
-Requires:      perl(Socket)
-Requires:      perl(Storable)
-Requires:      perl(Thread::Queue)
-Requires:      perl(threads)
-Requires:      perl(Time::HiRes)
-Requires:      perl(URI::Escape)
-Requires:      perl(XML::Parser)
-
-# Modules typically absent from AL2023 default repos — bundle via src/
-# or install with cpanm at deploy time. Re-enable if a future AL2023
-# release ships them.
-%if !0%{?amzn}
-Requires:      perl(Crypt::Rijndael)
-Requires:      perl(Date::Manip)
-Requires:      perl(FCGI)
-Requires:      perl(Log::Log4perl)
-Requires:      perl(MIME::Lite)
-Requires:      perl(Plack)
-Requires:      perl(Plack::Handler::FCGI)
-Requires:      perl(Plack::Util)
-Requires:      perl(Plack::Test)
-Requires:      perl(Template)
-Requires:      perl(Tie::IxHash)
+# fedora
+%if 0%{?fedora}
+BuildRequires: perl-devel
+BuildRequires: expat-devel
 %endif
 
 # disable creating useless empty debug packages
@@ -101,6 +89,9 @@ large installations.
 %install
 %{__rm} -rf %{buildroot}
 %{__make} install DESTDIR="%{buildroot}" LIBDIR="%{_libdir}/thruk/"
+%if %{defined suse_version}
+%{__make} installbuilddeps DESTDIR="%{buildroot}" LIBDIR="%{_libdir}/thruk/"
+%endif
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -109,8 +100,5 @@ large installations.
 %attr(-,root,root) %{_libdir}/thruk
 
 %changelog
-* Fri Aug 22 2025 Sven Nierlein <sven.nierlein@consol.de> 3.24-1
-- Migrate to use system perl modules whenever possible
-
 * Mon Jul 13 2015 Sven Nierlein <sven.nierlein@consol.de> 2.00-1
 - Initial libs package
